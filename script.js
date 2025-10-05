@@ -34,22 +34,39 @@ function displayTasks() {
 
     taskText.addEventListener("click", () => toggleComplete(index));
 
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "Edit";
+    editBtn.className = "edit";
+
+    editBtn.addEventListener("click", () => {
+      if (editBtn.textContent === "Edit") {
+        // Replace text with input box for editing
+        const input = document.createElement("input");
+        input.type = "text";
+        input.value = task.title;
+        taskItem.replaceChild(input, taskText);
+        editBtn.textContent = "Save";
+      } else {
+        // Save edited task title
+        const input = taskItem.querySelector("input");
+        const newValue = input.value.trim();
+        if (newValue) {
+          tasks[index].title = newValue;
+          displayTasks();
+        } else {
+          alert("Task cannot be empty!");
+        }
+      }
+    });
+
     const deleteBtn = document.createElement("button");
     deleteBtn.textContent = "Delete";
     deleteBtn.className = "delete";
     deleteBtn.addEventListener("click", () => deleteTask(index));
 
     taskItem.appendChild(taskText);
+    taskItem.appendChild(editBtn);
     taskItem.appendChild(deleteBtn);
     taskList.appendChild(taskItem);
   });
-}
-function toggleComplete(index) {
-  tasks[index].completed = !tasks[index].completed;
-  displayTasks();
-}
-
-function deleteTask(index) {
-  tasks.splice(index, 1);
-  displayTasks();
 }
