@@ -1,72 +1,52 @@
- let tasks = [];
+let tasks = [];
 
 const taskInput = document.getElementById("taskInput");
 const taskList = document.getElementById("taskList");
+document.getElementById("addTaskBtn").onclick = addTask;
+
+function renderTasks() {
+  taskList.innerHTML = tasks.map((task, i) => `
+
+    <div class="task-item">
+      <div>
+        <input type="checkbox" ${task.completed ? "checked" : ""} onchange="toggleTask(${i})">
+        <span class="${task.completed ? "completed" : ""}">${task.title}</span>
+      </div>
+      <div>
+        <button class="edit" onclick="editTask(${i})">Edit</button>
+        <button class="delete" onclick="deleteTask(${i})">Delete</button>
+      </div>
+    </div>
+  `)
+}
 
 function addTask() {
-  const text = taskInput.value.trim();
-
-  if (!text) {
-    alert("Task cannot be empty!");
-    return;
-  }
-
-  const newTask = { title: text, completed: false };
-  tasks.push(newTask);
-
-  displayTasks();
+  if (!taskInput.value.trim()) return alert("Task cannot be empty!");
+  tasks.push({ title: taskInput.value.trim(), completed: false });
   taskInput.value = "";
+  renderTasks();
 }
 
-function displayTasks() {
-  taskList.innerHTML = "";
-
-  tasks.forEach((task, index) => {
-    const taskItem = document.createElement("div");
-    taskItem.className = "task-item";
-
-    const taskText = document.createElement("span");
-    taskText.textContent = task.title;
-
-    if (task.completed) {
-      taskText.classList.add("completed");
-    }
-
-    taskText.addEventListener("click", () => toggleComplete(index));
-
-    const editBtn = document.createElement("button");
-    editBtn.textContent = "Edit";
-    editBtn.className = "edit";
-
-    editBtn.addEventListener("click", () => {
-      if (editBtn.textContent === "Edit") {
-        // Replace text with input box for editing
-        const input = document.createElement("input");
-        input.type = "text";
-        input.value = task.title;
-        taskItem.replaceChild(input, taskText);
-        editBtn.textContent = "Save";
-      } else {
-        // Save edited task title
-        const input = taskItem.querySelector("input");
-        const newValue = input.value.trim();
-        if (newValue) {
-          tasks[index].title = newValue;
-          displayTasks();
-        } else {
-          alert("Task cannot be empty!");
-        }
-      }
-    });
-
-    const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = "Delete";
-    deleteBtn.className = "delete";
-    deleteBtn.addEventListener("click", () => deleteTask(index));
-
-    taskItem.appendChild(taskText);
-    taskItem.appendChild(editBtn);
-    taskItem.appendChild(deleteBtn);
-    taskList.appendChild(taskItem);
-  });
+function toggleTask(i) {
+  tasks[i].completed = !tasks[i].completed;
+  renderTasks();
 }
+
+function editTask(i) {
+  const newTitle = prompt("Edit Task:", tasks[i].title);
+  if (newTitle) tasks[i].title = newTitle.trim();
+  renderTasks();
+}
+
+function deleteTask(i) {
+  if (confirm("Delete this task?")) tasks.splice(i, 1);
+  renderTasks();
+}
+
+renderTasks();
+
+
+fetch("./tasks.json")
+  .then(response => response.json())
+  .then(data => console.log("DATA",data))
+  .catch(error => console.error('Error:', error));
